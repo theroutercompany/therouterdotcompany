@@ -84,8 +84,8 @@ body {
     color: #000;
 }
 
-.pill.orange {
-    background: linear-gradient(135deg, #ff6600, #cc5200);
+.pill.coral {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
     color: #000;
 }
 

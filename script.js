@@ -1,6 +1,6 @@
 const CONFIG = {
     labels: ['everything', 'r3x.sh', 'who is AI?', 'AI native', 'accelerate'],
-    colors: ['cyan', 'yellow', 'magenta', 'lime', 'orange'],
+    colors: ['cyan', 'yellow', 'magenta', 'lime', 'coral'],
     spawnDistance: 27,
     cellWidth: 112,
     cellHeight: 35,
