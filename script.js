@@ -1,13 +1,15 @@
 const CONFIG = {
-    labels: ['everything', 'r3x.sh', 'who is AI?'],
-    colors: ['cyan', 'yellow', 'magenta'],
+    labels: ['everything', 'r3x.sh', 'who is AI?', 'AI native', 'accelerate'],
+    colors: ['cyan', 'yellow', 'magenta', 'lime', 'orange'],
     spawnDistance: 27,
     cellWidth: 112,
     cellHeight: 35,
     cellPadding: 3,
     textAreaPadding: 100,
     canvasPaddingHorizontal: 30,
-    canvasPaddingVertical: 30
+    canvasPaddingVertical: 30,
+    baseAvoidance: 0.4,
+    historyDepth: 3
 };
 
 let grid = {};
@@ -117,9 +119,17 @@ function spawnPill(col, row) {
     const pill = document.createElement('div');
     pill.className = 'pill';
 
-    const colorClass = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)];
+    const colorClass = weightedRandomPick(CONFIG.colors, colorHistory, CONFIG.baseAvoidance, CONFIG.historyDepth);
+    const labelText = weightedRandomPick(CONFIG.labels, labelHistory, CONFIG.baseAvoidance, CONFIG.historyDepth);
+
+    colorHistory.push(colorClass);
+    labelHistory.push(labelText);
+
+    if (colorHistory.length > CONFIG.historyDepth) colorHistory.shift();
+    if (labelHistory.length > CONFIG.historyDepth) labelHistory.shift();
+
     pill.classList.add(colorClass);
-    pill.textContent = CONFIG.labels[Math.floor(Math.random() * CONFIG.labels.length)];
+    pill.textContent = labelText;
 
     pill.style.left = `${center.x}px`;
     pill.style.top = `${center.y}px`;
@@ -136,6 +146,35 @@ function distance(x1, y1, x2, y2) {
 
 let lastSpawnX = null;
 let lastSpawnY = null;
+let colorHistory = [];
+let labelHistory = [];
+
+function weightedRandomPick(options, history, baseAvoidance, historyDepth) {
+    if (history.length === 0) {
+        return options[Math.floor(Math.random() * options.length)];
+    }
+
+    const weights = options.map(opt => {
+        let weight = 1;
+        for (let i = 0; i < Math.min(history.length, historyDepth); i++) {
+            if (history[history.length - 1 - i] === opt) {
+                weight *= Math.pow(baseAvoidance, historyDepth - i);
+            }
+        }
+        return weight;
+    });
+
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+
+    let random = Math.random() * totalWeight;
+    for (let i = 0; i < options.length; i++) {
+        random -= weights[i];
+        if (random <= 0) {
+            return options[i];
+        }
+    }
+    return options[options.length - 1];
+}
 
 document.addEventListener('mousemove', (e) => {
     targetX = e.clientX;

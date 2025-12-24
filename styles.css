@@ -79,6 +79,16 @@ body {
     color: #fff;
 }
 
+.pill.lime {
+    background: linear-gradient(135deg, #32cd32, #228b22);
+    color: #000;
+}
+
+.pill.orange {
+    background: linear-gradient(135deg, #ff6600, #cc5200);
+    color: #000;
+}
+
 .cursor-dot {
     position: fixed;
     width: 1px;
