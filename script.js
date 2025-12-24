@@ -4,7 +4,9 @@ const CONFIG = {
     spawnDistance: 20,
     pillHeight: 40,
     minSpacing: 3,
-    textAreaPadding: 100
+    textAreaPadding: 100,
+    canvasPaddingHorizontal: 80,
+    canvasPaddingVertical: 30
 };
 
 let pills = [];
@@ -59,6 +61,15 @@ function wouldOverlap(x, y, width, height) {
     return false;
 }
 
+function isWithinCanvasBounds(x, y) {
+    const horizontalPadding = CONFIG.canvasPaddingHorizontal;
+    const verticalPadding = CONFIG.canvasPaddingVertical;
+    return x >= horizontalPadding &&
+           x <= window.innerWidth - horizontalPadding &&
+           y >= verticalPadding &&
+           y <= window.innerHeight - verticalPadding;
+}
+
 function findValidSpawnPosition(baseX, baseY, width, height, maxAttempts = 30) {
     const radius = 100;
 
@@ -68,7 +79,7 @@ function findValidSpawnPosition(baseX, baseY, width, height, maxAttempts = 30) {
         const x = baseX + Math.cos(angle) * distance;
         const y = baseY + Math.sin(angle) * distance;
 
-        if (!isInTextArea(x, y) && !wouldOverlap(x, y, width, height)) {
+        if (!isInTextArea(x, y) && !wouldOverlap(x, y, width, height) && isWithinCanvasBounds(x, y)) {
             return { x, y };
         }
     }
