@@ -1,10 +1,10 @@
 const CONFIG = {
     labels: ['everything', 'r3x.sh', 'who is AI?'],
     colors: ['cyan', 'yellow', 'magenta'],
-    spawnDistance: 20,
-    cellWidth: 84,
-    cellHeight: 26,
-    cellPadding: 2,
+    spawnDistance: 27,
+    cellWidth: 112,
+    cellHeight: 35,
+    cellPadding: 3,
     textAreaPadding: 100,
     canvasPaddingHorizontal: 30,
     canvasPaddingVertical: 30
