@@ -4,7 +4,7 @@ const CONFIG = {
     spawnDistance: 27,
     cellWidth: 112,
     cellHeight: 35,
-    cellPadding: 3,
+    cellPadding: 1,
     textAreaPadding: 100,
     canvasPaddingHorizontal: 30,
     canvasPaddingVertical: 30,
