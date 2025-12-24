@@ -24,6 +24,35 @@ let gridCols = 0;
 let gridRows = 0;
 let gridOffsetX = 0;
 let gridOffsetY = 0;
+let lastSpawnX = null;
+let lastSpawnY = null;
+let colorHistory = [];
+let labelHistory = [];
+
+const COLOR_BASES = {
+    cyan: '#00d4ff',
+    yellow: '#ffd700',
+    magenta: '#ff00ff',
+    lime: '#32cd32',
+    coral: '#ff6b6b'
+};
+
+function hexToRgb(hex) {
+    const normalized = hex.replace('#', '');
+    const bigint = parseInt(normalized, 16);
+    return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255
+    };
+}
+
+function getTextColorForClass(colorClass) {
+    const hex = COLOR_BASES[colorClass] || '#ffffff';
+    const { r, g, b } = hexToRgb(hex);
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return luminance > 0.5 ? '#000' : '#fff';
+}
 
 const cursorDot = document.createElement('div');
 cursorDot.className = 'cursor-dot';
@@ -130,6 +159,7 @@ function spawnPill(col, row) {
 
     pill.classList.add(colorClass);
     pill.textContent = labelText;
+    pill.style.color = getTextColorForClass(colorClass);
 
     pill.style.left = `${center.x}px`;
     pill.style.top = `${center.y}px`;
@@ -143,11 +173,6 @@ function spawnPill(col, row) {
 function distance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
-
-let lastSpawnX = null;
-let lastSpawnY = null;
-let colorHistory = [];
-let labelHistory = [];
 
 function weightedRandomPick(options, history, baseAvoidance, historyDepth) {
     if (history.length === 0) {

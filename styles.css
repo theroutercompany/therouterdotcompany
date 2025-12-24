@@ -66,27 +66,22 @@ body {
 
 .pill.cyan {
     background: linear-gradient(135deg, #00d4ff, #0099cc);
-    color: #000;
 }
 
 .pill.yellow {
     background: linear-gradient(135deg, #ffd700, #ffaa00);
-    color: #000;
 }
 
 .pill.magenta {
     background: linear-gradient(135deg, #ff00ff, #cc00cc);
-    color: #fff;
 }
 
 .pill.lime {
     background: linear-gradient(135deg, #32cd32, #228b22);
-    color: #000;
 }
 
 .pill.coral {
     background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
-    color: #000;
 }
 
 .cursor-dot {
