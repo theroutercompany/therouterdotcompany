@@ -49,18 +49,18 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 80px;
-    height: 40px;
-    padding: 0 16px;
-    border-radius: 5px;
-    font-size: 19px;
+    min-width: 50px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 3px;
+    font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
     transform: translate(-50%, -50%);
     will-change: transform;
     box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.3),
-        0 0 12px rgba(255, 255, 255, 0.1),
+        0 1px 4px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(255, 255, 255, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 

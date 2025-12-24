@@ -2,14 +2,14 @@ const CONFIG = {
     labels: ['everything', 'r3x.sh', 'who is AI?'],
     colors: ['cyan', 'yellow', 'magenta'],
     spawnDistance: 20,
-    pillHeight: 40,
-    minSpacing: 3,
+    cellWidth: 95,
+    cellHeight: 30,
     textAreaPadding: 100,
-    canvasPaddingHorizontal: 80,
+    canvasPaddingHorizontal: 30,
     canvasPaddingVertical: 30
 };
 
-let pills = [];
+let grid = {};
 let cursorX = window.innerWidth / 2;
 let cursorY = window.innerHeight / 2;
 let targetX = cursorX;
@@ -17,10 +17,48 @@ let targetY = cursorY;
 let isMoving = false;
 let moveTimeout = null;
 let firstMovementDetected = false;
+let gridCols = 0;
+let gridRows = 0;
+let gridOffsetX = 0;
+let gridOffsetY = 0;
 
 const cursorDot = document.createElement('div');
 cursorDot.className = 'cursor-dot';
 document.body.appendChild(cursorDot);
+
+function initGrid() {
+    const usableWidth = window.innerWidth - CONFIG.canvasPaddingHorizontal * 2;
+    const usableHeight = window.innerHeight - CONFIG.canvasPaddingVertical * 2;
+
+    gridCols = Math.floor(usableWidth / CONFIG.cellWidth);
+    gridRows = Math.floor(usableHeight / CONFIG.cellHeight);
+
+    gridOffsetX = CONFIG.canvasPaddingHorizontal + (usableWidth - gridCols * CONFIG.cellWidth) / 2;
+    gridOffsetY = CONFIG.canvasPaddingVertical + (usableHeight - gridRows * CONFIG.cellHeight) / 2;
+
+    grid = {};
+}
+
+function getCellCenter(col, row) {
+    return {
+        x: gridOffsetX + col * CONFIG.cellWidth + CONFIG.cellWidth / 2,
+        y: gridOffsetY + row * CONFIG.cellHeight + CONFIG.cellHeight / 2
+    };
+}
+
+function getCellFromPosition(x, y) {
+    const col = Math.floor((x - gridOffsetX) / CONFIG.cellWidth);
+    const row = Math.floor((y - gridOffsetY) / CONFIG.cellHeight);
+    return { col, row };
+}
+
+function isCellValid(col, row) {
+    return col >= 0 && col < gridCols && row >= 0 && row < gridRows;
+}
+
+function isCellOccupied(col, row) {
+    return grid[`${col},${row}`] === true;
+}
 
 function getTextAreaBounds() {
     const titleElement = document.querySelector('.hero-title');
@@ -35,82 +73,53 @@ function getTextAreaBounds() {
     };
 }
 
-function isInTextArea(x, y) {
+function isCellInTextArea(col, row) {
     const bounds = getTextAreaBounds();
     if (!bounds) return false;
 
-    return x >= bounds.left && x <= bounds.right &&
-           y >= bounds.top && y <= bounds.bottom;
+    const center = getCellCenter(col, row);
+    return center.x >= bounds.left && center.x <= bounds.right &&
+           center.y >= bounds.top && center.y <= bounds.bottom;
 }
 
-function wouldOverlap(x, y, width, height) {
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
-    const spacing = CONFIG.minSpacing;
+function findValidCell(baseX, baseY) {
+    const baseCell = getCellFromPosition(baseX, baseY);
 
-    for (const pill of pills) {
-        const dx = Math.abs(x - pill.x);
-        const dy = Math.abs(y - pill.y);
-        const pillHalfWidth = pill.width / 2;
-        const pillHalfHeight = pill.height / 2;
+    for (let radius = 0; radius <= 3; radius++) {
+        for (let dr = -radius; dr <= radius; dr++) {
+            for (let dc = -radius; dc <= radius; dc++) {
+                if (Math.abs(dr) !== radius && Math.abs(dc) !== radius) continue;
 
-        if (dx < halfWidth + pillHalfWidth + spacing && dy < halfHeight + pillHalfHeight + spacing) {
-            return true;
+                const col = baseCell.col + dc;
+                const row = baseCell.row + dr;
+
+                if (isCellValid(col, row) && !isCellOccupied(col, row) && !isCellInTextArea(col, row)) {
+                    return { col, row };
+                }
+            }
         }
     }
-    return false;
-}
 
-function isWithinCanvasBounds(x, y) {
-    const horizontalPadding = CONFIG.canvasPaddingHorizontal;
-    const verticalPadding = CONFIG.canvasPaddingVertical;
-    return x >= horizontalPadding &&
-           x <= window.innerWidth - horizontalPadding &&
-           y >= verticalPadding &&
-           y <= window.innerHeight - verticalPadding;
-}
-
-function findValidSpawnPosition(baseX, baseY, width, height, maxAttempts = 30) {
-    const radius = 100;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.random() * radius;
-        const x = baseX + Math.cos(angle) * distance;
-        const y = baseY + Math.sin(angle) * distance;
-
-        if (!isInTextArea(x, y) && !wouldOverlap(x, y, width, height) && isWithinCanvasBounds(x, y)) {
-            return { x, y };
-        }
-    }
     return null;
 }
 
-function spawnPill(x, y) {
+function spawnPill(col, row) {
+    const center = getCellCenter(col, row);
+
     const pill = document.createElement('div');
     pill.className = 'pill';
 
     const colorClass = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)];
     pill.classList.add(colorClass);
-    const labelText = CONFIG.labels[Math.floor(Math.random() * CONFIG.labels.length)];
-    pill.textContent = labelText;
+    pill.textContent = CONFIG.labels[Math.floor(Math.random() * CONFIG.labels.length)];
 
-    pill.style.left = `${x}px`;
-    pill.style.top = `${y}px`;
+    pill.style.left = `${center.x}px`;
+    pill.style.top = `${center.y}px`;
 
     const container = document.querySelector('.pills-container');
     container.appendChild(pill);
 
-    const width = Math.max(60, pill.offsetWidth);
-    const height = CONFIG.pillHeight;
-
-    pills.push({
-        element: pill,
-        x: x,
-        y: y,
-        width: width,
-        height: height
-    });
+    grid[`${col},${row}`] = true;
 }
 
 function distance(x1, y1, x2, y2) {
@@ -127,20 +136,21 @@ document.addEventListener('mousemove', (e) => {
 
     if (!firstMovementDetected) {
         firstMovementDetected = true;
+        initGrid();
         lastSpawnX = targetX;
         lastSpawnY = targetY;
-        for (let i = 0; i < 10; i++) {
-            const validPos = findValidSpawnPosition(targetX, targetY, 80, CONFIG.pillHeight);
-            if (validPos) {
-                spawnPill(validPos.x, validPos.y);
+        for (let i = 0; i < 3; i++) {
+            const cell = findValidCell(targetX, targetY);
+            if (cell) {
+                spawnPill(cell.col, cell.row);
             }
         }
     } else {
         const dist = distance(lastSpawnX, lastSpawnY, targetX, targetY);
         if (dist >= CONFIG.spawnDistance) {
-            const validPos = findValidSpawnPosition(targetX, targetY, 80, CONFIG.pillHeight);
-            if (validPos) {
-                spawnPill(validPos.x, validPos.y);
+            const cell = findValidCell(targetX, targetY);
+            if (cell) {
+                spawnPill(cell.col, cell.row);
                 lastSpawnX = targetX;
                 lastSpawnY = targetY;
             }
@@ -161,20 +171,21 @@ document.addEventListener('touchmove', (e) => {
 
     if (!firstMovementDetected) {
         firstMovementDetected = true;
+        initGrid();
         lastSpawnX = targetX;
         lastSpawnY = targetY;
-        for (let i = 0; i < 10; i++) {
-            const validPos = findValidSpawnPosition(targetX, targetY, 80, CONFIG.pillHeight);
-            if (validPos) {
-                spawnPill(validPos.x, validPos.y);
+        for (let i = 0; i < 3; i++) {
+            const cell = findValidCell(targetX, targetY);
+            if (cell) {
+                spawnPill(cell.col, cell.row);
             }
         }
     } else {
         const dist = distance(lastSpawnX, lastSpawnY, targetX, targetY);
         if (dist >= CONFIG.spawnDistance) {
-            const validPos = findValidSpawnPosition(targetX, targetY, 80, CONFIG.pillHeight);
-            if (validPos) {
-                spawnPill(validPos.x, validPos.y);
+            const cell = findValidCell(targetX, targetY);
+            if (cell) {
+                spawnPill(cell.col, cell.row);
                 lastSpawnX = targetX;
                 lastSpawnY = targetY;
             }
