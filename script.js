@@ -2,8 +2,9 @@ const CONFIG = {
     labels: ['everything', 'r3x.sh', 'who is AI?'],
     colors: ['cyan', 'yellow', 'magenta'],
     spawnDistance: 20,
-    cellWidth: 95,
-    cellHeight: 30,
+    cellWidth: 84,
+    cellHeight: 26,
+    cellPadding: 2,
     textAreaPadding: 100,
     canvasPaddingHorizontal: 30,
     canvasPaddingVertical: 30
@@ -30,25 +31,32 @@ function initGrid() {
     const usableWidth = window.innerWidth - CONFIG.canvasPaddingHorizontal * 2;
     const usableHeight = window.innerHeight - CONFIG.canvasPaddingVertical * 2;
 
-    gridCols = Math.floor(usableWidth / CONFIG.cellWidth);
-    gridRows = Math.floor(usableHeight / CONFIG.cellHeight);
+    const cellTotalWidth = CONFIG.cellWidth + CONFIG.cellPadding;
+    const cellTotalHeight = CONFIG.cellHeight + CONFIG.cellPadding;
 
-    gridOffsetX = CONFIG.canvasPaddingHorizontal + (usableWidth - gridCols * CONFIG.cellWidth) / 2;
-    gridOffsetY = CONFIG.canvasPaddingVertical + (usableHeight - gridRows * CONFIG.cellHeight) / 2;
+    gridCols = Math.floor(usableWidth / cellTotalWidth);
+    gridRows = Math.floor(usableHeight / cellTotalHeight);
+
+    gridOffsetX = CONFIG.canvasPaddingHorizontal + (usableWidth - gridCols * cellTotalWidth) / 2;
+    gridOffsetY = CONFIG.canvasPaddingVertical + (usableHeight - gridRows * cellTotalHeight) / 2;
 
     grid = {};
 }
 
 function getCellCenter(col, row) {
+    const cellTotalWidth = CONFIG.cellWidth + CONFIG.cellPadding;
+    const cellTotalHeight = CONFIG.cellHeight + CONFIG.cellPadding;
     return {
-        x: gridOffsetX + col * CONFIG.cellWidth + CONFIG.cellWidth / 2,
-        y: gridOffsetY + row * CONFIG.cellHeight + CONFIG.cellHeight / 2
+        x: gridOffsetX + col * cellTotalWidth + cellTotalWidth / 2,
+        y: gridOffsetY + row * cellTotalHeight + cellTotalHeight / 2
     };
 }
 
 function getCellFromPosition(x, y) {
-    const col = Math.floor((x - gridOffsetX) / CONFIG.cellWidth);
-    const row = Math.floor((y - gridOffsetY) / CONFIG.cellHeight);
+    const cellTotalWidth = CONFIG.cellWidth + CONFIG.cellPadding;
+    const cellTotalHeight = CONFIG.cellHeight + CONFIG.cellPadding;
+    const col = Math.floor((x - gridOffsetX) / cellTotalWidth);
+    const row = Math.floor((y - gridOffsetY) / cellTotalHeight);
     return { col, row };
 }
 
